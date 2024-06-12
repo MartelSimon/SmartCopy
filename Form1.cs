@@ -76,22 +76,6 @@ namespace SDCardTool
         private void buttonSDCardSelect_Click(object sender, EventArgs e)
         {
             SelectPath(PathType.SDCard);
-            
-            /*FolderBrowserDialog dialog = new FolderBrowserDialog();
-
-            if(!string.IsNullOrEmpty(_sdCardPath)) //We verify the SD card path is not null or empty.
-                dialog.SelectedPath = _sdCardPath; //We set the selected SD card path to the previous one to make change of directories easier.
-
-            if(dialog.ShowDialog() == DialogResult.OK) //We check the dialog result is ok and not cancel otherwise we ignore the dialog.
-            {
-                if(ValidatePath(dialog.SelectedPath)) //We make sure the user selected a valid existing path.
-                {
-                    _sdCardPath = dialog.SelectedPath; //If the path is valid we update the stored path.
-                    textBoxSDPath.Text = dialog.SelectedPath; //We also need to update the textbox text to the new path.
-                }
-                else
-                    MessageBox.Show("Please select a valid path.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); //We show an error dialog if the path is invalid or non existant.
-            }*/
         }
 
         private void SelectPath(PathType pathType)
@@ -191,10 +175,14 @@ namespace SDCardTool
             {
                 case ScanType.Update:
                     {
+                        Console.WriteLine("Here");
+
                         var sourceFiles = Directory.EnumerateFiles(_sourcePath, "*", SearchOption.AllDirectories).Select(file => (GetReducedPath(file, PathType.Source), File.GetLastWriteTimeUtc(file)));
 
                         var sdCardFiles = Directory.EnumerateFiles(_sdCardPath, "*", SearchOption.AllDirectories).Select(file => (GetReducedPath(file, PathType.SDCard), File.GetLastWriteTimeUtc(file)));
                         var sdCardDirectories = Directory.EnumerateDirectories(_sdCardPath, "*", SearchOption.AllDirectories).Select(dir => GetReducedPath(dir, PathType.SDCard));
+
+                        Console.WriteLine("Done");
 
                         foreach (var dir in sdCardDirectories)
                         {
@@ -207,12 +195,16 @@ namespace SDCardTool
                             }
                         }
 
-                        foreach ((string, DateTime) sFileInfo in sourceFiles.Where(sFile => sdCardFiles.Any(tFile => tFile.Item1.Equals(sFile.Item1) && tFile.Item2 != sFile.Item2)))
+                        Console.WriteLine("Here2");
+
+                        foreach ((string, DateTime) sFileInfo in sourceFiles.AsParallel().Where(sFile => sdCardFiles.Any(tFile => tFile.Item1.Equals(sFile.Item1) && tFile.Item2 != sFile.Item2)))
                         {
                             AddChildrenNode(sFileInfo.Item1, Color.DarkBlue, 1);
                             files.Add(sFileInfo.Item1);
                             //File.SetLastWriteTimeUtc(GetFullPath(sFileInfo.Item1, PathType.SDCard), sFileInfo.Item2);
                         }
+
+                        Console.WriteLine("Done2");
 
                         break;
                     }
@@ -415,7 +407,34 @@ namespace SDCardTool
                 return;
             }
 
-            MessageBox.Show($"{_filesToUpdate.Count} file{(_filesToUpdate.Count > 1 ? "s" : "")} will be updated, {_filesToRemove.Count} file{(_filesToRemove.Count > 1 ? "s" : "")} will be removed, {_filesToAdd.Count} file{(_filesToAdd.Count > 1 ? "s" : "")} will be added, do you want to continue ?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show($"{_filesToUpdate.Count} file{(_filesToUpdate.Count > 1 ? "s" : "")} will be updated, {_filesToRemove.Count} file{(_filesToRemove.Count > 1 ? "s" : "")} will be removed, {_filesToAdd.Count} file{(_filesToAdd.Count > 1 ? "s" : "")} will be added, do you want to continue ?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result != DialogResult.Yes)
+                return;
+
+            foreach (var path in _filesToAdd)
+            {
+                if(File.Exists(GetFullPath(path, PathType.Source)))
+                {
+                    File.Copy(GetFullPath(path, PathType.Source), GetFullPath(path, PathType.SDCard));
+                }
+                else if(Directory.Exists(GetFullPath(path, PathType.Source)))
+                {
+                    Directory.CreateDirectory(GetFullPath(path, PathType.SDCard));
+                }
+            }
+
+            foreach (var path in _filesToRemove)
+            {
+                if(File.Exists(GetFullPath(path, PathType.SDCard)))
+                {
+                    File.Delete(GetFullPath(path, PathType.SDCard));
+                }
+                else if(Directory.Exists(GetFullPath(path, PathType.SDCard)))
+                {
+                    Directory.Delete(GetFullPath(path, PathType.SDCard), true);
+                }
+            }
         }
 
         private string GetFullPath(string path, PathType pathType) => path.Insert(0, pathType == PathType.Source ? _sourcePath : _sdCardPath);
