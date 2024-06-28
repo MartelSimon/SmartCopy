@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SDCardTool")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("SmartCopy")]
+[assembly: AssemblyDescription("Tool to compare two folder and add, remove and update files and folder inside.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SDCardTool")]
+[assembly: AssemblyProduct("SmartCopy")]
 [assembly: AssemblyCopyright("Copyright ©  2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SDCardTool.Properties {
+namespace SmartCopy.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -38,12 +38,12 @@ namespace SDCardTool.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SDCardPath {
+        public string TargetPath {
             get {
-                return ((string)(this["SDCardPath"]));
+                return ((string)(this["TargetPath"]));
             }
             set {
-                this["SDCardPath"] = value;
+                this["TargetPath"] = value;
             }
         }
         
